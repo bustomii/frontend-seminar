@@ -8,12 +8,15 @@ import reportWebVitals from './reportWebVitals';
 import axios from 'axios'
 const URL = 'http://127.0.0.1:4000/'
 
+const REACT_VERSION = React.version;
+
 axios.defaults.baseURL = URL
 axios.defaults.headers.common['Authorization'] = "Bearer "+localStorage.getItem('access_token')
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <Provider store={configureStore()}>
-    <App /></Provider>,
+    {/* <div>React version: {REACT_VERSION}</div> */}
+    <App/></Provider>,
 );
 
 // If you want to start measuring performance in your app, pass a function

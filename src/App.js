@@ -1,7 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import 'mdb-react-ui-kit/dist/css/mdb.min.css'
+import '@fortawesome/fontawesome-free/css/all.min.css';
 import { ComponentLogin } from './components/login';
 import axios from 'axios'
 import { useState, useEffect } from 'react'
@@ -11,6 +12,7 @@ import { startAction } from "./actions/startAction";
 import { stopAction } from "./actions/stopAction";
 import { useSelector, useDispatch } from 'react-redux';
 import accessAction from './actions/accessAction';
+
 
 const mapStateToProps = state => ({
   ...state

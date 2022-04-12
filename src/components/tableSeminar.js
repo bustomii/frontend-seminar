@@ -1,15 +1,147 @@
-import react, {useState} from 'react'
+import react, { useState, useEffect } from 'react'
 import { Button, Container, Table } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal'
 import Badge from 'react-bootstrap/Badge'
 import axios from 'axios'
+import swal from 'sweetalert';
+import FileSaver from "file-saver";
+import { MDBDataTableV5 } from 'mdbreact';
+// import XLSX from "xlsx";
 
 export const TableSeminar = (props) => {
+    const [dataAll, setdataAll] = useState(props.data)
     const [modalImport, setmodalImport] = useState(false)
     const [fileUpload, setfileUpload] = useState()      
     const [fileName, setFileName] = useState("");
     const [extention, setExtention] = useState("")
+    const [modalApprove, setmodalApprove] = useState(false)
+    const [detailNama, setdetailNama] = useState('')
+    const [detailEmail, setdetailEmail] = useState('')
+    const [detailNoHp, setdetailNoHp] = useState('')
+    const [detailID, setdetailID] = useState('')
 
+    const [datatable, setDatatable] = useState({
+        columns: [
+            {
+                label: 'No',
+                field: 'no',
+                attributes: {
+                    'aria-controls': 'DataTable',
+                    'aria-label': 'No',
+                },
+            },
+            {
+                label: 'Nama',
+                field: 'nama',
+            },
+            {
+                label: 'Email',
+                field: 'email',
+            },
+            {
+                label: 'No Telepon',
+                field: 'notelepon',
+            },
+            {
+                label: 'Status',
+                field: 'status',
+            },
+        ],
+        rows: []
+    })
+
+    const pushDataTable = (array) => {
+        const rows = []
+        for(let i=0; i<array.length; i++){
+            const add = new Object()
+            add.no = i+1
+            add.nama = array[i].nama
+            add.email = array[i].email
+            add.notelepon = array[i].no_tlp
+            if(array[i].status === 0){
+                add.status = (<Badge style={{cursor:"pointer", width:80}} bg="warning" onClick={(e)=>{detailPeserta(array[i].nama, array[i].email, array[i].no_tlp, array[i].id)}}>Approve</Badge>)
+            }else if(array[i].status === 1){
+                add.status = (<Badge style={{width:80}} bg="success">Approved</Badge>)
+            }else{
+                add.status = (<Badge style={{width:80}} bg="danger">Not attend</Badge>)
+            }
+            rows.push(add)
+        }
+        setDatatable({...datatable, rows:rows})
+    }
+
+    useEffect(() => {
+        setdataAll(props.data)
+        const recent = props.data
+        pushDataTable(recent)
+    }, [props.data])
+
+    //export data to excel
+    const fileType =
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+    
+    const exportToXL = (apiData, fileName) => {
+        // const ws = XLSX.utils.json_to_sheet(apiData);
+        // const wb = { Sheets: { data: ws }, SheetNames: ["Sheet 1"] };
+        // const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+        // const data = new Blob([excelBuffer], { type: fileType });
+        FileSaver.saveAs('', fileName + fileExtension);
+    };
+
+    //delete all data
+    const DeleteAll = () => {
+        axios.post('/delete-all').then((res) => {
+            setdataAll(res.data.data)
+            pushDataTable(res.data.data)
+            swal({
+                title: "Delete Success",
+                text: "Click the button to exit!",
+                icon: "success",
+            });
+        }).catch((err) => {
+            console.log(err)
+        })
+    }
+
+    //aprove data
+    const ApproveFunc = (id, type) => {
+        axios.post('/approve', {id, type}).then((res) => {
+            setdataAll(res.data.data)
+            pushDataTable(res.data.data)
+            setmodalApprove(false)
+            if(type == 1){
+                // "http://youtube.com"
+                swal({
+                    title: "Success",
+                    text: "Click the button to exit!",
+                    icon: "success",
+                }).then(function() {
+                    window.open('https://forms.gle/Qus8awWfarXo9DpZ6', '_blank');
+                });
+                
+            }else{
+                swal({
+                    title: "Not Attend",
+                    text: "Click the button to exit!",
+                    icon: "warning",
+                });
+            }
+        }).catch((err) => {
+            console.log(err)
+        })
+    }
+
+    //modal detail aprove
+    const detailPeserta = (nama, email, nohp, id) => {
+        setdetailID(id)
+        setdetailNama(nama)
+        setdetailEmail(email)
+        setdetailNoHp(nohp)
+        setmodalApprove(true)
+    }
+
+    //change value
     const handleInputChange = (event) => {
         var re = /(?:\.([^.]+))?$/;
         let name = event.target.files[0].name
@@ -18,6 +150,7 @@ export const TableSeminar = (props) => {
         setExtention(re.exec(name)[1]);
     }
 
+    //submit import data
     const submit = async (e) => {
         const formData = new FormData();
         formData.append("file", fileUpload);
@@ -28,22 +161,36 @@ export const TableSeminar = (props) => {
                 "/import-data",
                 formData
             );
-            console.log(res.data);
+            if(res.data.status === 400){
+                swal({
+                    title: "Error",
+                    text: res.data.message,
+                    icon: "error",
+                });
+            }else{
+                pushDataTable(res.data.data)
+                setdataAll(res.data.data)
+                setmodalImport(false)
+                swal({
+                    title: "Success",
+                    text: "Click the button to exit!",
+                    icon: "success",
+                });
+            }
         } catch (err) {
             console.log(err);
         }
     };
 
-    const data = props.data
-    let viewTable = data.length > 0 ? data.map((value, index) => { 
+    let viewTable = dataAll.length > 0 ? dataAll.map((value, index) => { 
     return (
         <tr>
-            <td>{value.id}</td>
+            <td>{index + 1}</td>
             <td>{value.nama}</td>
             <td>{value.email}</td>
             <td>{value.no_tlp}</td>
             <td>{value.status == 0 ?
-            (<Badge key={index} style={{cursor:"pointer", width:80}} bg="warning" onClick={(e)=>{alert('approved')}}>Approve</Badge>):value.status == 1?
+            (<Badge key={index} style={{cursor:"pointer", width:80}} bg="warning" onClick={(e)=>{detailPeserta(value.nama, value.email, value.no_tlp, value.id)}}>Approve</Badge>):value.status == 1?
             (<Badge key={index} style={{width:80}} bg="success">Approved</Badge>):(<Badge key={index} style={{width:80}} bg="danger">Not attend</Badge>)}</td>
         </tr>
     )
@@ -55,10 +202,29 @@ export const TableSeminar = (props) => {
     return (
         <Container>
             <div style={{padding:10}}>
-            <Button onClick={(e)=> {setmodalImport(true)}} variant="primary"><i className="bi bi-upload"></i> Import Data</Button>{' '}
-            <Button variant="secondary"><i className="bi bi-download"></i> Export Data</Button>{' '}
+            <Button style={{marginTop:5}} onClick={(e)=> {setmodalImport(true)}} variant="primary"><i className="bi bi-upload"></i> Import Data</Button>{' '}
+            <Button style={{marginTop:5}} onClick={(e)=> {exportToXL(dataAll, 'dataseminar')}} variant="secondary"><i className="bi bi-download"></i> Export Data</Button>{' '}
+            <Button style={{marginTop:5}} onClick={(e)=> {
+                swal({
+                    title: "Are you sure?",
+                    text: "You will not be able to recover this imaginary file!",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                }).then((willDelete) => {
+                    if (willDelete) {
+                        DeleteAll()
+                    } else {
+                        swal({
+                            title: "Cancel Delete",
+                            text: "Your imaginary file is safe!",
+                            icon: "info",
+                        });
+                    }
+                });
+            }} variant="danger"><i className="bi bi-trash"></i> Delete All Data</Button>{' '}
             </div>
-        <Table responsive striped bordered hover>
+        {/* <Table responsive striped bordered hover>
             <thead>
             <tr>
                 <th>No</th>
@@ -80,8 +246,8 @@ export const TableSeminar = (props) => {
                 <th>Status</th>
             </tr>
             </tfoot>
-        </Table>
-
+        </Table> */}
+        <MDBDataTableV5 responsive hover entriesOptions={[5, 10, 20, 25]} entries={10} pagesAmount={4} data={datatable} searchTop searchBottom={false} />
         <Modal
         show={modalImport}
         onHide={() => setmodalImport(false)}
@@ -105,6 +271,45 @@ export const TableSeminar = (props) => {
                         </Button>
                     </Modal.Footer>
             </Modal.Body>
+        </Modal>
+
+        <Modal
+        show={modalApprove}
+        onHide={() => setmodalApprove(false)}
+        dialogClassName="modal-90w"
+        aria-labelledby="example-custom-modal-styling-title"
+        >
+            <Modal.Header>
+                <Modal.Title id="example-custom-modal-styling-title">
+                    DETAIL
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <div className='text-center'>
+                    <div className="form-group">
+                        <label>Nama : </label>
+                        <label>&nbsp; {detailNama}</label>
+                    </div>
+                    <div className="form-group">
+                        <label>Email : </label>
+                        <label>&nbsp; {detailEmail}</label>
+                    </div>
+                    <div className="form-group">
+                        <label>No Hp : </label>
+                        <label>&nbsp; {detailNoHp}</label>
+                    </div>
+                </div>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="success" size="lg" onClick={(e) => {
+                    ApproveFunc(detailID, 1)}}>
+                    Approve
+                </Button>
+                <Button variant="danger" size="lg" onClick={(e) => {
+                    ApproveFunc(detailID, -1)}}>
+                    Not Attend
+                </Button>
+            </Modal.Footer>
         </Modal>
     </Container>
     )
