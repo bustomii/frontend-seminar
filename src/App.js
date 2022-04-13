@@ -12,6 +12,8 @@ import { startAction } from "./actions/startAction";
 import { stopAction } from "./actions/stopAction";
 import { useSelector, useDispatch } from 'react-redux';
 import accessAction from './actions/accessAction';
+import userAccess from './actions/userAction';
+import { AdminComponent } from './components/admin';
 
 
 const mapStateToProps = state => ({
@@ -25,25 +27,27 @@ const mapDispatchToProps = dispatch => ({
 
 function App() {
   const access = useSelector((value) => value.access)
+  const user = useSelector((value) => value.user)
   const dispatch = useDispatch()
   const [dataSeminar, setdataSeminar] = useState([])
   
   useEffect(() => { 
-    axios.defaults.headers.common['Authorization'] =
-    'Bearer ' + localStorage.getItem("access_token")
-    axios.get('/data-seminar').then((res)=>{
-      setdataSeminar(res.data.data)
-      dispatch(accessAction(true))
-    }).catch((err) => {
-      // console.log(err)
-    })
+      axios.defaults.headers.common['Authorization'] =
+      'Bearer ' + localStorage.getItem("access_token")
+      axios.get('/data-seminar').then((res) => {
+        setdataSeminar(res.data.data)
+        dispatch(accessAction(true))
+        dispatch(userAccess(res.data.user))
+      }).catch((err) => {
+        // console.log(err)
+      })
   }, [access])
 
   return (
     <div className="App">
-      {access?null:(
+      {access?user === null? null: user.id === 1 ? (<AdminComponent data={dataSeminar}/>):(<TableSeminar data={dataSeminar}/>):(
       <ComponentLogin data={dataSeminar}/>)}
-      <TableSeminar data={dataSeminar}/>
+      
     </div>
   );
 }

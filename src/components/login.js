@@ -4,6 +4,7 @@ import Button from 'react-bootstrap/Button'
 import axios from 'axios'
 import { useDispatch, useSelector } from 'react-redux'
 import accessAction from '../actions/accessAction'
+import userAccess from '../actions/userAction'
 
 
 export const ComponentLogin = (props) => {
@@ -17,6 +18,7 @@ export const ComponentLogin = (props) => {
     const [alertUsername, setalertUsername] = useState('')
     const [statusConfirm, setstatusConfirm] = useState('')
     const [colorStatus, setcolorStatus] = useState('')
+    
     useEffect(() => {
         if(access === false){
             setShow(true)
@@ -49,6 +51,7 @@ export const ComponentLogin = (props) => {
                     setcolorStatus('green')
                     localStorage.setItem('access_token', res.data.accessToken)
                     dispatch(accessAction(true))
+                    dispatch(userAccess(res.data.username))
 
                 }else if(res.data.status === 401 || res.data.status === 404){
                     setalertUsername('red')
@@ -79,7 +82,7 @@ export const ComponentLogin = (props) => {
         >
             <Modal.Header>
                 <Modal.Title id="example-custom-modal-styling-title">
-                    SIGN IN ADMIN
+                    SIGN IN
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
