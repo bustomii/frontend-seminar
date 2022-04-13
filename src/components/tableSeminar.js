@@ -6,9 +6,14 @@ import axios from 'axios'
 import swal from 'sweetalert';
 import FileSaver from "file-saver";
 import { MDBDataTableV5 } from 'mdbreact';
-// import XLSX from "xlsx";
+import ReactExport from "react-export-excel-xlsx-fix";
+
+const ExcelFile = ReactExport.ExcelFile;
+const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
+const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
 
 export const TableSeminar = (props) => {
+    const years = new Date().getFullYear()
     const [dataAll, setdataAll] = useState(props.data)
     const [modalImport, setmodalImport] = useState(false)
     const [fileUpload, setfileUpload] = useState()      
@@ -19,6 +24,7 @@ export const TableSeminar = (props) => {
     const [detailEmail, setdetailEmail] = useState('')
     const [detailNoHp, setdetailNoHp] = useState('')
     const [detailID, setdetailID] = useState('')
+    const [statusApprove, setstatusApprove] = useState(false)
 
     const [datatable, setDatatable] = useState({
         columns: [
@@ -77,17 +83,6 @@ export const TableSeminar = (props) => {
     }, [props.data])
 
     //export data to excel
-    const fileType =
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-    const fileExtension = ".xlsx";
-    
-    const exportToXL = (apiData, fileName) => {
-        // const ws = XLSX.utils.json_to_sheet(apiData);
-        // const wb = { Sheets: { data: ws }, SheetNames: ["Sheet 1"] };
-        // const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-        // const data = new Blob([excelBuffer], { type: fileType });
-        FileSaver.saveAs('', fileName + fileExtension);
-    };
 
     //delete all data
     const DeleteAll = () => {
@@ -109,12 +104,12 @@ export const TableSeminar = (props) => {
         axios.post('/approve', {id, type}).then((res) => {
             setdataAll(res.data.data)
             pushDataTable(res.data.data)
-            setmodalApprove(false)
+            // setmodalApprove(false)
             if(type == 1){
-                // "http://youtube.com"
+                setstatusApprove(true)
                 swal({
                     title: "Success",
-                    text: "Click the button to exit!",
+                    text: "Click the button to go Google Form!",
                     icon: "success",
                 }).then(function() {
                     window.open('https://forms.gle/Qus8awWfarXo9DpZ6', '_blank');
@@ -182,29 +177,47 @@ export const TableSeminar = (props) => {
         }
     };
 
-    let viewTable = dataAll.length > 0 ? dataAll.map((value, index) => { 
-    return (
-        <tr>
-            <td>{index + 1}</td>
-            <td>{value.nama}</td>
-            <td>{value.email}</td>
-            <td>{value.no_tlp}</td>
-            <td>{value.status == 0 ?
-            (<Badge key={index} style={{cursor:"pointer", width:80}} bg="warning" onClick={(e)=>{detailPeserta(value.nama, value.email, value.no_tlp, value.id)}}>Approve</Badge>):value.status == 1?
-            (<Badge key={index} style={{width:80}} bg="success">Approved</Badge>):(<Badge key={index} style={{width:80}} bg="danger">Not attend</Badge>)}</td>
-        </tr>
-    )
-    }):(
-    <tr>
-        <td colSpan="5">No data entries</td>
-    </tr>
-    )
+    // table data
+    // let viewTable = dataAll.length > 0 ? dataAll.map((value, index) => { 
+    // return (
+    //     <tr>
+    //         <td>{index + 1}</td>
+    //         <td>{value.nama}</td>
+    //         <td>{value.email}</td>
+    //         <td>{value.no_tlp}</td>
+    //         <td>{value.status == 0 ?
+    //         (<Badge key={index} style={{cursor:"pointer", width:80}} bg="warning" onClick={(e)=>{detailPeserta(value.nama, value.email, value.no_tlp, value.id)}}>Approve</Badge>):value.status == 1?
+    //         (<Badge key={index} style={{width:80}} bg="success">Approved</Badge>):(<Badge key={index} style={{width:80}} bg="danger">Not attend</Badge>)}</td>
+    //     </tr>
+    // )
+    // }):(
+    // <tr>
+    //     <td colSpan="5">No data entries</td>
+    // </tr>
+    // )
+
     return (
         <Container>
             <div style={{padding:10}}>
             <Button style={{marginTop:5}} onClick={(e)=> {setmodalImport(true)}} variant="primary"><i className="bi bi-upload"></i> Import Data</Button>{' '}
-            <Button style={{marginTop:5}} onClick={(e)=> {exportToXL(dataAll, 'dataseminar')}} variant="secondary"><i className="bi bi-download"></i> Export Data</Button>{' '}
-            <Button style={{marginTop:5}} onClick={(e)=> {
+            {dataAll.length > 0 ?
+            <ExcelFile filename={"Data Seminar "+ years} element={<Button style={{marginTop:5}} variant="secondary"><i className="bi bi-download"></i> Export Data</Button>}>
+                <ExcelSheet data={dataAll} name={"Data Seminar "+ years} >
+                    <ExcelColumn label="No" value="id"/>
+                    <ExcelColumn label="Nama" value="nama"/>
+                    <ExcelColumn label="Email" value="email"/>
+                    <ExcelColumn label="No Hp" value="no_tlp"/>
+                    <ExcelColumn label="Status" value={(col) => col.status === 1 ? "Hadir" : "Tidak Hadir"}/>
+                </ExcelSheet>
+            </ExcelFile>
+            :(<Button style={{marginTop:5}} onClick={(e) => {
+                swal({
+                    title: "No Data to Export",
+                    text: "Click the button to exit!",
+                    icon: "warning",
+                })}} variant="secondary"><i className="bi bi-download"></i> Export Data</Button>)}
+            {' '}
+            {dataAll.length > 0 ?(<Button style={{marginTop:5}} onClick={(e)=> {
                 swal({
                     title: "Are you sure?",
                     text: "You will not be able to recover this imaginary file!",
@@ -222,7 +235,11 @@ export const TableSeminar = (props) => {
                         });
                     }
                 });
-            }} variant="danger"><i className="bi bi-trash"></i> Delete All Data</Button>{' '}
+            }} variant="danger"><i className="bi bi-trash"></i> Delete All Data</Button>):(<Button style={{marginTop:5}} onClick={(e)=> {swal({
+                title: "No Data to Export",
+                text: "Click the button to exit!",
+                icon: "warning",
+            })}} variant="danger"><i className="bi bi-trash"></i> Delete All Data</Button>)}
             </div>
         {/* <Table responsive striped bordered hover>
             <thead>
@@ -254,7 +271,7 @@ export const TableSeminar = (props) => {
         dialogClassName="modal-90w"
         aria-labelledby="example-custom-modal-styling-title"
         >
-            <Modal.Header>
+            <Modal.Header closeButton>
                 <Modal.Title id="example-custom-modal-styling-title">
                     IMPORT DATA SEMINAR
                 </Modal.Title>
@@ -264,22 +281,27 @@ export const TableSeminar = (props) => {
                         <label>File Excel</label>
                         <input type="file" onChange={handleInputChange} accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" className="form-control"/>
                     </div>
-                    <Modal.Footer>
-                    <label style={{color:''}}>{}</label>
-                        <Button variant="primary" size="lg" onClick={submit}>
-                            SAVE
-                        </Button>
-                    </Modal.Footer>
             </Modal.Body>
+            <Modal.Footer>
+                <label style={{color:''}}>{}</label>
+                <Button variant="primary" size="lg" onClick={submit}>
+                    SAVE
+                </Button>
+            </Modal.Footer>
         </Modal>
 
         <Modal
         show={modalApprove}
-        onHide={() => setmodalApprove(false)}
+        onHide={() => {
+            setmodalApprove(false)
+            setTimeout(() => {
+                setstatusApprove(false)
+            }, 500);
+        }}
         dialogClassName="modal-90w"
         aria-labelledby="example-custom-modal-styling-title"
         >
-            <Modal.Header>
+            <Modal.Header closeButton>
                 <Modal.Title id="example-custom-modal-styling-title">
                     DETAIL
                 </Modal.Title>
@@ -298,8 +320,15 @@ export const TableSeminar = (props) => {
                         <label>No Hp : </label>
                         <label>&nbsp; {detailNoHp}</label>
                     </div>
+                    {statusApprove ? (
+                    <div className="form-group">
+                        <Badge style={{width:80}} bg="success">Approved</Badge>
+                    </div>
+                    ):null}
                 </div>
             </Modal.Body>
+            {statusApprove? null:(
+            <>
             <Modal.Footer>
                 <Button variant="success" size="lg" onClick={(e) => {
                     ApproveFunc(detailID, 1)}}>
@@ -310,6 +339,8 @@ export const TableSeminar = (props) => {
                     Not Attend
                 </Button>
             </Modal.Footer>
+            </>
+            )}
         </Modal>
     </Container>
     )
