@@ -100,8 +100,10 @@ export const TableSeminar = (props) => {
     }
 
     //aprove data
-    const ApproveFunc = (id, type) => {
+    const ApproveFunc = (id, type, nama, email) => {
         axios.post('/approve', {id, type}).then((res) => {
+            const linkAutofill = `https://docs.google.com/forms/d/e/1FAIpQLSdGKnN3NgWEG_gVbesv3HfgzaAtreffATfquB5HSMX74319AA/viewform?usp=pp_url&entry.1900039790=${email}&entry.828018661=${nama}&entry.1322278785=${email}`
+            const linkAutofillSubmit = `https://docs.google.com/forms/d/e/1FAIpQLSdGKnN3NgWEG_gVbesv3HfgzaAtreffATfquB5HSMX74319AA/formResponse?usp=pp_url&entry.1900039790=${email}&entry.828018661=${nama}&entry.1322278785=${email}&submit=Submit`
             setdataAll(res.data.data)
             pushDataTable(res.data.data)
             // setmodalApprove(false)
@@ -112,7 +114,8 @@ export const TableSeminar = (props) => {
                     text: "Click the button to go Google Form!",
                     icon: "success",
                 }).then(function() {
-                    window.open('https://forms.gle/Qus8awWfarXo9DpZ6', '_blank');
+                    // https://forms.gle/Qus8awWfarXo9DpZ6
+                    window.open(linkAutofillSubmit, '_blank');
                 });
                 
             }else{
@@ -264,7 +267,7 @@ export const TableSeminar = (props) => {
             </tr>
             </tfoot>
         </Table> */}
-        <MDBDataTableV5 responsive hover entriesOptions={[5, 10, 20, 25]} entries={10} pagesAmount={4} data={datatable} searchTop searchBottom={false} />
+        <MDBDataTableV5 striped responsive hover entriesOptions={[5, 10, 20, 25]} entries={10} pagesAmount={4} data={datatable} searchTop searchBottom={false} />
         <Modal
         show={modalImport}
         onHide={() => setmodalImport(false)}
@@ -331,11 +334,11 @@ export const TableSeminar = (props) => {
             <>
             <Modal.Footer>
                 <Button variant="success" size="lg" onClick={(e) => {
-                    ApproveFunc(detailID, 1)}}>
+                    ApproveFunc(detailID, 1, detailNama, detailEmail)}}>
                     Approve
                 </Button>
                 <Button variant="danger" size="lg" onClick={(e) => {
-                    ApproveFunc(detailID, -1)}}>
+                    ApproveFunc(detailID, -1, detailNama, detailEmail)}}>
                     Not Attend
                 </Button>
             </Modal.Footer>
