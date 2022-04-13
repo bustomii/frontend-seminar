@@ -103,13 +103,13 @@ export const ComponentLogin = (props) => {
                             setpassword(e.target.value)
                         }} className="form-control" placeholder="Enter password" style={{borderColor:alertPassword}} />
                     </div>
-                    <Modal.Footer>
-                    <label style={{color:colorStatus}}>{statusConfirm}</label>
-                        <Button variant="primary" size="lg" onClick={Login}>
-                            SIGN IN
-                        </Button>
-                    </Modal.Footer>
             </Modal.Body>
+            <Modal.Footer>
+                <label style={{color:colorStatus}}>{statusConfirm}</label>
+                    <Button variant="primary" size="lg" onClick={Login}>
+                        SIGN IN
+                    </Button>
+            </Modal.Footer>
         </Modal>
     )
 }

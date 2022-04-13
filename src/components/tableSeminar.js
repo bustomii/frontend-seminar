@@ -239,7 +239,7 @@ export const TableSeminar = (props) => {
                     }
                 });
             }} variant="danger"><i className="bi bi-trash"></i> Delete All Data</Button>):(<Button style={{marginTop:5}} onClick={(e)=> {swal({
-                title: "No Data to Export",
+                title: "No Data to Delete",
                 text: "Click the button to exit!",
                 icon: "warning",
             })}} variant="danger"><i className="bi bi-trash"></i> Delete All Data</Button>)}
