@@ -7,7 +7,7 @@ import configureStore from './store'
 import reportWebVitals from './reportWebVitals';
 import axios from 'axios'
 // const URL = 'http://127.0.0.1:4000/' //local
-const URL = 'seminar.astronacci.com:4000/' //server
+const URL = 'http://seminar.astronacci.com:4000/' //server
 
 const REACT_VERSION = React.version;
 
