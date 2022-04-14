@@ -107,8 +107,10 @@ export const TableSeminar = (props) => {
     //aprove data
     const ApproveFunc = (id, type, nama, email) => {
         axios.post('/approve', {id, type}).then((res) => {
-            const linkAutofill = `https://docs.google.com/forms/d/e/1FAIpQLSdGKnN3NgWEG_gVbesv3HfgzaAtreffATfquB5HSMX74319AA/viewform?usp=pp_url&entry.1900039790=${email}&entry.828018661=${nama}&entry.1322278785=${email}`
-            const linkAutofillSubmit = `https://docs.google.com/forms/d/e/1FAIpQLSdGKnN3NgWEG_gVbesv3HfgzaAtreffATfquB5HSMX74319AA/formResponse?usp=pp_url&entry.1900039790=${email}&entry.828018661=${nama}&entry.1322278785=${email}&submit=Submit`
+            // const linkAutofill = `https://docs.google.com/forms/d/e/1FAIpQLSdGKnN3NgWEG_gVbesv3HfgzaAtreffATfquB5HSMX74319AA/viewform?usp=pp_url&entry.1900039790=${email}&entry.828018661=${nama}&entry.1322278785=${email}`
+            // const linkAutofillSubmit = `https://docs.google.com/forms/d/e/1FAIpQLSdGKnN3NgWEG_gVbesv3HfgzaAtreffATfquB5HSMX74319AA/formResponse?usp=pp_url&entry.1900039790=${email}&entry.828018661=${nama}&entry.1322278785=${email}&submit=Submit`
+            const linkSertifikat = `https://docs.google.com/forms/d/e/1FAIpQLScoMZ7QDKaq-puBVJITfGGg451VHMunyTmpZKJbUrTjTIyemQ/formResponse?usp=pp_url&entry.9055391=${nama}&entry.406298920=${email}&submit=Submit`
+            
             setdataAll(res.data.data)
             pushDataTable(res.data.data)
             // setmodalApprove(false)
@@ -119,8 +121,7 @@ export const TableSeminar = (props) => {
                     text: "Click the button to go Google Form!",
                     icon: "success",
                 }).then(function() {
-                    // https://forms.gle/Qus8awWfarXo9DpZ6
-                    window.open(linkAutofillSubmit, '_blank');
+                    window.open(linkSertifikat, '_blank');
                 });
                 
             }else{
@@ -186,25 +187,6 @@ export const TableSeminar = (props) => {
         }
     };
 
-    // table data
-    // let viewTable = dataAll.length > 0 ? dataAll.map((value, index) => { 
-    // return (
-    //     <tr>
-    //         <td>{index + 1}</td>
-    //         <td>{value.nama}</td>
-    //         <td>{value.email}</td>
-    //         <td>{value.no_tlp}</td>
-    //         <td>{value.status == 0 ?
-    //         (<Badge key={index} style={{cursor:"pointer", width:80}} bg="warning" onClick={(e)=>{detailPeserta(value.nama, value.email, value.no_tlp, value.id)}}>Approve</Badge>):value.status == 1?
-    //         (<Badge key={index} style={{width:80}} bg="success">Approved</Badge>):(<Badge key={index} style={{width:80}} bg="danger">Not attend</Badge>)}</td>
-    //     </tr>
-    // )
-    // }):(
-    // <tr>
-    //     <td colSpan="5">No data entries</td>
-    // </tr>
-    // )
-
     const logOut = () => {
         setdataAll([])
         pushDataTable([])
@@ -259,29 +241,6 @@ export const TableSeminar = (props) => {
                     icon: "warning",
                 })}} variant="danger"><i className="bi bi-trash"></i> Delete All Data</Button>)}
                 </div>
-            {/* <Table responsive striped bordered hover>
-                <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Nama</th>
-                    <th>Email</th>
-                    <th>No Hp</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                    {viewTable}
-                </tbody>
-                <tfoot>
-                <tr>
-                    <th>No</th>
-                    <th>Nama</th>
-                    <th>Email</th>
-                    <th>No Hp</th>
-                    <th>Status</th>
-                </tr>
-                </tfoot>
-            </Table> */}
             <MDBDataTableV5 striped responsive hover entriesOptions={[5, 10, 20, 25]} entries={10} pagesAmount={4} data={datatable} searchTop searchBottom={false} />
             <Modal
             show={modalImport}
