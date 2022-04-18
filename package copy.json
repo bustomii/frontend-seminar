@@ -24,7 +24,8 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
-    "start": "set HTTPS=true SSL_CRT_FILE=./root.crt SSL_KEY_FILE=./private.key && react-scripts start",
+    "start": "set PORT=5000 && set HTTPS=true && SSL_CRT_FILE=root.crt && SSL_KEY_FILE=private.key && react-scripts start",
+    "start:windows": "set PORT=5000 && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
