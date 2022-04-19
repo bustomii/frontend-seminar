@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import accessAction from '../actions/accessAction'
 import { NavbarComponent } from './layout/header';
 import { FooterComponent } from './layout/footer';
+import userAccess from '../actions/userAction';
 
 const ExcelFile = ReactExport.ExcelFile;
 const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
@@ -31,6 +32,10 @@ export const AdminComponent = (props) => {
     const [alertcolor, setalertcolor] = useState('')
     const [alertdisplayname, setalertdisplayname] = useState('')
     const [arrayID, setarrayID] = useState('')
+    const [modalEdit, setmodalEdit] = useState(false)
+    const [editusername, seteditusername] = useState('')
+    const [editdisplayname, seteditdisplayname] = useState('')
+    const [editID, seteditID] = useState()
 
     const [datatable, setDatatable] = useState({
         columns: [
@@ -88,6 +93,13 @@ export const AdminComponent = (props) => {
         })
     }
 
+    const editUser = (id, username, displayname) => {
+        setmodalEdit(true)
+        seteditusername(username)
+        seteditID(id)
+        seteditdisplayname(displayname)
+    }
+
     const pushDataTable = (array) => {
         const rows = []
         for(let i=0; i<array.length; i++){
@@ -118,9 +130,10 @@ export const AdminComponent = (props) => {
                 add.password = (<Badge style={{width:80}} bg="success">No request</Badge>)
             }
             if(array[i].id === 1){ 
-                add.action = ''
+                add.action = (<i className="bi bi-pencil-square" style={{color:'green', fontSize:20, cursor:'pointer'}} onClick={(e)=>{editUser(array[i].id, array[i].username, array[i].display_name )}}></i>)
             }else{
-                add.action = (<i className="bi bi-trash" style={{color:'red', cursor:'pointer'}} onClick={(e)=>{deleteUser(array[i].id)}}></i>)
+                add.action = (<><i className="bi bi-pencil-square" style={{color:'green', fontSize:20, cursor:'pointer'}} onClick={(e)=>{editUser(array[i].id, array[i].username, array[i].display_name )}}></i>{'   '} &nbsp; 
+                <i className="bi bi-trash" style={{color:'red', fontSize:20, cursor:'pointer'}} onClick={(e)=>{deleteUser(array[i].id)}}></i></>)
                 if(!arrayID.includes(array[i].id)){
                     setarrayID([...arrayID, array[i].id])
                 }
@@ -163,7 +176,7 @@ export const AdminComponent = (props) => {
     }
 
     const AddUser = (username, pass, cpass, displayname) => {
-        if(username === '' || username.length < 6){
+        if(username === '' || username.length < 5){
             setalertuser('red')
         }
         if(pass === ''){
@@ -175,7 +188,7 @@ export const AdminComponent = (props) => {
         if(displayname === ''){
             setalertdisplayname('red')
         }
-        if(username !== '' && username.length >= 6 && pass !== '' && cpass !== '' && displayname !== ''){
+        if(username !== '' && username.length >= 5 && pass !== '' && cpass !== '' && displayname !== ''){
             if(pass !== cpass){
                 setalertconfirm('red')
                 setalertdisplayname('red')
@@ -189,6 +202,46 @@ export const AdminComponent = (props) => {
                         icon: "success",
                     });
                     setmodalAddUser(false)
+                    getData()
+                }).catch((err)=>{
+                    // setmodalAddUser(false)
+                    swal({
+                        title: "Failed",
+                        text: "Click the button to exit!",
+                        icon: "error",
+                    });
+                })
+            }
+        }
+    }
+
+    const EditUser = (username, pass, cpass, displayname) => {
+        if(username === '' || username.length < 5){
+            setalertuser('red')
+        }
+        if(pass === ''){
+            setalertpassword('red')
+        }
+        if(cpass === ''){
+            setalertconfirm('red')
+        }
+        if(displayname === ''){
+            setalertdisplayname('red')
+        }
+        if(username !== '' && username.length >= 5 && pass !== '' && cpass !== '' && displayname !== ''){
+            if(pass !== cpass){
+                setalertconfirm('red')
+                setalertdisplayname('red')
+                setalertstatus('Password no match !')
+                setalertcolor('red')
+            }else{
+                axios.post('/edit-user', {username, password:pass, display_name:displayname}).then((res) => {
+                    swal({
+                        title: "Add user success",
+                        text: "Click the button to exit!",
+                        icon: "success",
+                    });
+                    setmodalEdit(false)
                     getData()
                 }).catch((err)=>{
                     // setmodalAddUser(false)
@@ -299,13 +352,13 @@ export const AdminComponent = (props) => {
                         </div>
                         <div className="form-group" style={{marginTop:5}}>
                             <label>Password</label>
-                            <input type="text" style={{borderColor:alertconfirm}} onChange={(e) => {
+                            <input type="password" style={{borderColor:alertconfirm}} onChange={(e) => {
                                 setpassword(e.target.value)
                             }} onFocus={(e) => {refreshAlert('','')}} className="form-control" placeholder='Input password'/>
                         </div>
                         <div className="form-group" style={{marginTop:5}}>
                             <label>Confirm Password</label>
-                            <input type="text" style={{borderColor:alertdisplayname}} onChange={(e) => {
+                            <input type="password" style={{borderColor:alertdisplayname}} onChange={(e) => {
                                 setconfirmpassword(e.target.value)
                             }} onFocus={(e) => {refreshAlert('','')}} className="form-control" placeholder='Confirm your password'/>
                         </div>
@@ -313,6 +366,52 @@ export const AdminComponent = (props) => {
                 <Modal.Footer>
                     <label style={{color:alertcolor}}>{alertstatus}</label>
                     <Button variant="primary" size="lg" onClick={(e)=>{AddUser(username, password, confirmpassword, displayname)}}>
+                        SAVE
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal
+            show={modalEdit}
+            onHide={() => setmodalEdit(false)}
+            dialogClassName="modal-90w"
+            aria-labelledby="example-custom-modal-styling-title"
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title id="example-custom-modal-styling-title">
+                        ADD NEW USER
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                        <div className="form-group">
+                            <label>Username</label>
+                            <input type="text" style={{borderColor:alertuser}} value={editusername} onChange={(e) => {
+                                seteditusername(e.target.value)
+                                cekUser(e.target.value)
+                            }} onFocus={(e) => {refreshAlert('','')}} className="form-control" placeholder='Username min 6 char' prefix='iya'/>
+                        </div>
+                        <div className="form-group" style={{marginTop:5}}>
+                            <label>Display Name</label>
+                            <input type="text" style={{borderColor:alertpassword}} value={editdisplayname} onChange={(e) => {
+                                seteditdisplayname(e.target.value)
+                            }} onFocus={(e) => {refreshAlert('','')}} className="form-control" placeholder='Input display name'/>
+                        </div>
+                        <div className="form-group" style={{marginTop:5}}>
+                            <label>New Password</label>
+                            <input type="password" style={{borderColor:alertconfirm}} onChange={(e) => {
+                                setpassword(e.target.value)
+                            }} onFocus={(e) => {refreshAlert('','')}} className="form-control" placeholder='Input password'/>
+                        </div>
+                        <div className="form-group" style={{marginTop:5}}>
+                            <label>Confirm New Password</label>
+                            <input type="password" style={{borderColor:alertdisplayname}} onChange={(e) => {
+                                setconfirmpassword(e.target.value)
+                            }} onFocus={(e) => {refreshAlert('','')}} className="form-control" placeholder='Confirm your password'/>
+                        </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <label style={{color:alertcolor}}>{alertstatus}</label>
+                    <Button variant="primary" size="lg" onClick={(e)=>{EditUser(editusername, password, confirmpassword, editdisplayname)}}>
                         SAVE
                     </Button>
                 </Modal.Footer>
