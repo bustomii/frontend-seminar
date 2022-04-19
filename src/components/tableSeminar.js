@@ -109,8 +109,13 @@ export const TableSeminar = (props) => {
         axios.post('/approve', {id, type}).then((res) => {
             // const linkAutofill = `https://docs.google.com/forms/d/e/1FAIpQLSdGKnN3NgWEG_gVbesv3HfgzaAtreffATfquB5HSMX74319AA/viewform?usp=pp_url&entry.1900039790=${email}&entry.828018661=${nama}&entry.1322278785=${email}`
             // const linkAutofillSubmit = `https://docs.google.com/forms/d/e/1FAIpQLSdGKnN3NgWEG_gVbesv3HfgzaAtreffATfquB5HSMX74319AA/formResponse?usp=pp_url&entry.1900039790=${email}&entry.828018661=${nama}&entry.1322278785=${email}&submit=Submit`
-            const linkSertifikat = `https://docs.google.com/forms/d/e/1FAIpQLScoMZ7QDKaq-puBVJITfGGg451VHMunyTmpZKJbUrTjTIyemQ/formResponse?usp=pp_url&entry.9055391=${nama}&entry.406298920=${email}&submit=Submit`
-            
+            // const linkSertifikat = `https://docs.google.com/forms/d/e/1FAIpQLScoMZ7QDKaq-puBVJITfGGg451VHMunyTmpZKJbUrTjTIyemQ/formResponse?usp=pp_url&entry.9055391=${nama}&entry.406298920=${email}&submit=Submit`
+            // let linkSertifikat = 'https://docs.google.com/forms/d/e/1FAIpQLScoMZ7QDKaq-puBVJITfGGg451VHMunyTmpZKJbUrTjTIyemQ/formResponse?usp=pp_url&entry.9055391=!$NAMA$!&entry.406298920=!$EMAIL$!&submit=Submit'
+            // linkSertifikat.replace('!$NAMA$!', nama)
+            // linkSertifikat.replace('!$EMAIL$!', email)
+            // console.log(linkSertifikat)
+            const linkSertifikat = `https://docs.google.com/forms/d/e/1FAIpQLSc6-dmBLbRNFcTo0AlbFBCnxyU8qne9D0fGRZ0HMARO1xO79g/formResponse?usp=pp_url&entry.424813151=${nama}&entry.804156214=${email}&submit=Submit`
+
             setdataAll(res.data.data)
             pushDataTable(res.data.data)
             // setmodalApprove(false)
